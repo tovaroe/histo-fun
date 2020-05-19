@@ -63,7 +63,7 @@ function [cell_masks,tissue_mask] = segment_cells(image, varargin)
 % See input parser for arguments
 %% Parse inputs
 defaultStain = 'HE';
-expectedStains = {'HE', 'H DAB', 'H DAB 2', 'H DAB Ventana'};
+expectedStains = {'HE', 'H DAB', 'H DAB 2', 'H DAB Ventana', 'HE Pigment'};
 defaultAreaChannels = 1:2;
 defaultAreaThreshold = 200;
 defaultAreaClosureStrel = strel('disk', 30);
@@ -131,11 +131,11 @@ for channel=1:length(p.Results.channels)
     otsu = imfill(otsu, 'holes');
 
     % Phansalkar
-    phansalkar = ~phansalkar(I,p.Results.phansalkarRadius(channel),p.Results.phansalkar_k(channel));
-    phansalkar = watershed_segmentation(phansalkar, p.Results.watershedSigma(channel));
+    phans = ~phansalkar(I,p.Results.phansalkarRadius(channel),p.Results.phansalkar_k(channel));
+    phans = watershed_segmentation(phans, p.Results.watershedSigma(channel));
 
     % Combine
-    cell_mask= phansalkar & otsu & global_bw;
+    cell_mask= phans & otsu & global_bw;
 
     if p.Results.survivalNeighbors
         cell_mask = bwultsurvive(cell_mask, p.Results.survivalNeighborhood(channel), p.Results.survivalNeighbors(channel)); % This is similar to a custom erosion, where only pixels with at least two neighbours survive
